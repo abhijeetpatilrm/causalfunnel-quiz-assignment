@@ -8,7 +8,7 @@ This application provides a timed quiz experience with 15 multiple-choice questi
 
 ## 🚀 Live Demo
 
-**Live URL:** [Add deployment link here]
+**Live URL:** [https://causalfunnel-quiz.netlify.app/]
 
 ### Screenshots
 
