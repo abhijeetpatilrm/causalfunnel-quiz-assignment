@@ -21,6 +21,19 @@ _Quiz Page - Timer, progress tracking, and question navigation_
 _Report Page - Detailed results with answer comparison_
 ![Report Page](./screenshots/report-page.png)
 
+### Performance Metrics
+
+The application is optimized for performance, accessibility, and best practices:
+
+![Lighthouse Score](./screenshots/lighthouse-score.png)
+
+**Lighthouse Audit Highlights:**
+
+- ⚡ **Performance**: Optimized bundle size and efficient rendering
+- ♿ **Accessibility**: Semantic HTML and ARIA labels for screen readers
+- ✅ **Best Practices**: Modern web standards and security considerations
+- 🔍 **SEO**: Proper meta tags and structured content
+
 ---
 
 ## 🎯 Approach & Design Decisions
