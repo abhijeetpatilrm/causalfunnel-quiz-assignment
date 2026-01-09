@@ -1,5 +1,7 @@
 /**
  * Shuffles an array using the Fisher-Yates algorithm
+ * Ensures uniform distribution (every permutation equally likely)
+ * Unlike sort(() => Math.random() - 0.5), which has statistical bias
  * @param {Array} array - The array to shuffle
  * @returns {Array} A new shuffled array
  */

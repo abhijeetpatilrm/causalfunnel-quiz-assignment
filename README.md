@@ -59,6 +59,100 @@ The primary goal was to build a **reliable, user-friendly quiz application** tha
 
 **Browser Warnings**: Prevents accidental tab closure during active quizzes, protecting user progress from unintentional actions.
 
+### Implementation Deep Dive
+
+#### 1. Question State Tracking Logic
+
+To provide clear visual feedback in the navigation panel, each question is categorized into one of three states: `unvisited`, `visited`, or `attempted`. This categorization happens automatically as users interact with the quiz.
+
+The state tracking is driven by a simple state array maintained in the `useQuiz` hook:
+
+```javascript
+// State array: one status per question
+const [questionStatusMap, setQuestionStatusMap] = useState([]);
+
+// Initialize all questions as "unvisited"
+setQuestionStatusMap(new Array(data.length).fill("unvisited"));
+
+// When navigating to a question
+const goToQuestion = (index) => {
+  setQuestionStatusMap((prev) => {
+    const updated = [...prev];
+    if (updated[index] === "unvisited") {
+      updated[index] = "visited"; // Mark as visited on first view
+    }
+    return updated;
+  });
+};
+
+// When selecting an answer
+const selectAnswer = (answer) => {
+  setQuestionStatusMap((prev) => {
+    const updated = [...prev];
+    updated[currentQuestionIndex] = "attempted"; // Mark as attempted
+    return updated;
+  });
+};
+```
+
+**Why this approach?** Rather than computing status on-the-fly in the UI layer, maintaining explicit state ensures predictable rendering and eliminates ambiguity. The status is a fact about user interaction, not a derived value, making debugging and testing straightforward.
+
+#### 2. Answer Selection & UI Feedback
+
+Selected answers are visually distinguished using conditional styling that directly reflects component state. This keeps the feedback logic declarative and centralized:
+
+```javascript
+const isSelected = selectedAnswer === option;
+
+<button
+  className={`
+    w-full px-4 py-3 rounded-lg border-2 transition-all
+    ${
+      isSelected
+        ? "border-blue-500 bg-blue-50 text-blue-900"
+        : "border-gray-300 bg-white hover:border-gray-400"
+    }
+  `}
+  aria-pressed={isSelected}
+>
+  {/* ... */}
+</button>;
+```
+
+All styling decisions derive from the `selectedAnswer` prop passed down from the `useQuiz` hook. There are no local UI flags or separate click handlers tracking selection state. This eliminates the risk of UI and state diverging, a common source of bugs in form-heavy applications.
+
+**Why this approach?** Single source of truth. The question card is purely presentational—it renders what it's told to render. State management happens at the hook level, keeping components dumb and easily testable.
+
+#### 3. Timer Auto-Submit Safety
+
+The timer must trigger submission exactly once when it expires, even if the component re-renders or users navigate rapidly. This is achieved using a ref-based flag:
+
+```javascript
+const hasExpiredRef = useRef(false);
+
+useEffect(() => {
+  intervalRef.current = setInterval(() => {
+    setTimeRemaining((prev) => {
+      if (prev <= 1) {
+        clearInterval(intervalRef.current);
+
+        // Guard against multiple invocations
+        if (!hasExpiredRef.current && onExpire) {
+          hasExpiredRef.current = true;
+          onExpire(); // Submit quiz exactly once
+        }
+
+        return 0;
+      }
+      return prev - 1;
+    });
+  }, 1000);
+  // ...
+}, [totalSeconds, onExpire]);
+```
+
+**Why this approach?** `useRef` persists across renders without triggering re-renders itself. Even if `onExpire` changes or the interval fires multiple times due to timing edge cases, the flag ensures the submission callback is invoked exactly once. This prevents duplicate API calls, double navigation, or corrupted state from race conditions.
+
 ---
 
 ## 🏗️ Architecture & Component Breakdown
@@ -256,5 +350,3 @@ The codebase is ready for review, deployment, and future enhancement.
 MIT
 
 ---
-
-**Built with ❤️ for the CausalFunnel Software Engineer Intern Assignment**

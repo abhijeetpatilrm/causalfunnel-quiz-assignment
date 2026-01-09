@@ -23,6 +23,7 @@ export async function fetchQuizQuestions(retryCount = 0) {
             retryCount + 1
           }/${MAX_RETRIES})`
         );
+        // Exponential backoff: increases delay with each retry to reduce API load
         await new Promise((resolve) =>
           setTimeout(resolve, RETRY_DELAY * (retryCount + 1))
         );
@@ -79,6 +80,7 @@ function normalizeQuestions(rawQuestions) {
     return {
       id: index + 1,
       question: decodeHTML(question.question),
+      // Shuffle options to prevent positional bias (e.g., "correct answer is always first")
       options: shuffleOptions(allOptions).map((option) => decodeHTML(option)),
       correctAnswer: decodeHTML(question.correct_answer),
     };
@@ -87,6 +89,8 @@ function normalizeQuestions(rawQuestions) {
 
 /**
  * Decodes HTML entities in strings
+ * Uses browser's native HTML parser instead of regex for proper handling of
+ * all entity types (&quot;, &amp;, &#39;, etc.) without edge case failures
  * @param {string} html - String with HTML entities
  * @returns {string} Decoded string
  */

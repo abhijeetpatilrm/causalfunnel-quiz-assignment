@@ -27,7 +27,8 @@ export function useQuiz() {
         setUserAnswers(new Array(data.length).fill(null));
         setQuestionStatusMap(new Array(data.length).fill("unvisited"));
 
-        // Mark first question as visited
+        // Mark first question as visited immediately so the overview panel reflects
+        // the user's current position without requiring manual navigation
         if (data.length > 0) {
           setQuestionStatusMap((prev) => {
             const updated = [...prev];
@@ -50,6 +51,7 @@ export function useQuiz() {
    * @param {string} answer - The selected answer
    */
   const selectAnswer = (answer) => {
+    // Prevent answer changes after submission to maintain result integrity
     if (isSubmitted) return;
 
     setUserAnswers((prev) => {
@@ -77,6 +79,8 @@ export function useQuiz() {
 
     setQuestionStatusMap((prev) => {
       const updated = [...prev];
+      // Only transition from unvisited -> visited (one-way)
+      // Preserves "attempted" status even when revisiting answered questions
       if (updated[index] === "unvisited") {
         updated[index] = "visited";
       }

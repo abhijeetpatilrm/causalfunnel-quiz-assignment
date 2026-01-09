@@ -36,6 +36,8 @@ function QuizPage() {
   }, [currentQuestionIndex]);
 
   // Prevent accidental tab close/refresh during active quiz
+  // Only active when quiz is in progress (not loading, not submitted) to avoid
+  // annoying users on the start page or after they've finished
   useEffect(() => {
     if (!isLoading && !isSubmitted && questions.length > 0) {
       const handleBeforeUnload = (e) => {
@@ -53,6 +55,7 @@ function QuizPage() {
 
   // Handle timer expiry
   const handleTimerExpire = () => {
+    // Guard against double submission if user manually submits at the exact moment timer expires
     if (!isSubmitted) {
       submitQuiz();
       navigate("/report");

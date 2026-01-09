@@ -8,6 +8,8 @@ import { useState, useEffect, useRef } from "react";
  */
 function Timer({ totalSeconds, onExpire }) {
   const [timeRemaining, setTimeRemaining] = useState(totalSeconds);
+  // Ref-based flag ensures onExpire is called exactly once, even if the interval
+  // fires multiple times or the component re-renders during the final second
   const hasExpiredRef = useRef(false);
   const intervalRef = useRef(null);
 
