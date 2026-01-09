@@ -1,10 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuiz } from "../hooks/useQuiz";
 import Timer from "../components/Timer";
 import QuestionCard from "../components/QuestionCard";
 import QuestionOverview from "../components/QuestionOverview";
 import CircularProgress from "../components/CircularProgress";
+import ConfirmModal from "../components/ConfirmModal";
 
 const QUIZ_DURATION_SECONDS = 1800; // 30 minutes
 
@@ -29,6 +30,8 @@ function QuizPage() {
     isFirstQuestion,
     isLastQuestion,
   } = useQuiz();
+
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   // Scroll to top when question changes
   useEffect(() => {
@@ -64,13 +67,17 @@ function QuizPage() {
 
   // Handle manual submit
   const handleSubmit = () => {
-    const confirmed = window.confirm(
-      "Are you sure you want to submit the quiz? You cannot change your answers after submission."
-    );
-    if (confirmed) {
-      submitQuiz();
-      navigate("/report");
-    }
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmSubmit = () => {
+    setShowConfirmModal(false);
+    submitQuiz();
+    navigate("/report");
+  };
+
+  const handleCancelSubmit = () => {
+    setShowConfirmModal(false);
   };
 
   // Loading state
@@ -225,6 +232,16 @@ function QuizPage() {
           </div>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={showConfirmModal}
+        onConfirm={handleConfirmSubmit}
+        onCancel={handleCancelSubmit}
+        title="Submit Quiz"
+        message="Are you sure you want to submit the quiz? You cannot change your answers after submission."
+        confirmText="Submit Quiz"
+        cancelText="Cancel"
+      />
     </div>
   );
 }
